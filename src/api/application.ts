@@ -21,7 +21,7 @@ export const createApplication = async (application: Omit<Application, 'id' | 'u
     return response.json();
 };
 
-export const updateApplication = async (application: Application): Promise<Application> => {
+export const updateApplication = async (application: Omit<Application, 'updatedAt'>): Promise<Application> => {
     const response = await fetch(`${API_BASE_URL}/${application.id}`, {
         method: 'PUT',
         headers: {
