@@ -1,11 +1,13 @@
 import type { Application } from '../types/application';
 
-const API_BASE_URL = '/api/applications';
+const API_BASE_URL = 'http://localhost:3000/api/applications';
 
 export const getApplications = async (): Promise<Application[]> => {
-    const response = await fetch(`${API_BASE_URL}`);
+    const response = await fetch(`${API_BASE_URL}`, {
+         method: 'GET', 
+    });
     if (!response.ok) {
-        throw new Error('Failed to fetch applications');
+        throw new Error('Catastrophic failure when retrieving applications');
     }
     return response.json();
 };
