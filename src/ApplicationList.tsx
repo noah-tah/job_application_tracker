@@ -42,20 +42,33 @@ export default function ApplicationList() {
 
     return (
         <div>
-            <h1>Application List</h1>
-            {
-            applications.length === 0 
-            ? (
-                <p>You haven't added any applications yet, add one below!</p>
-            ) : (
-                <ul>
-                    {applications.map((application) => (
-                        <li key={application.id}>{application.company}</li>
-                    ))}
-                </ul>
-            )}
-            <button onClick={() => {
-            }}>Add Application</button>
+            <div>
+                <button>Back</button>
+                <h1>Application List</h1>
+                <button>New</button>
+            </div>
+            <div className="application-list-container">
+                {
+                applications.length === 0 
+                ? (
+                    <p>You haven't added any applications yet, add one below!</p>
+                ) : (
+                    <ul className="application-list">
+                        {applications.map((application) => (
+                            <li key={application.id} className="application-item">
+                                <h1>{application.company}</h1>
+                                <h2>{application.role}</h2>
+                                <a href={application.job_url} target="_blank" rel="noopener noreferrer">{application.job_url}</a>
+                                <p>{application.dateApplied}</p>
+                                <p>{application.status}</p>
+                                <p>{application.notes}</p>
+                                <p>{application.updatedAt}</p>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
         </div>
     )
 }
