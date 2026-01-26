@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Small base so you can immediately see styling apply */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+

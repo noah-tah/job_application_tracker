@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../job_application_tracker_server"
+		}
+	],
+	"settings": {}
+}
