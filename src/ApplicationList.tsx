@@ -1,5 +1,5 @@
 import type { Application } from './types/application';
-import { getApplications } from './api/application';
+import { getApplications, deleteApplication } from './api/application';
 import { useState, useEffect } from 'react';
 
 const formatDateMMDDYYYY = (value: string | null | undefined): string => {
@@ -28,7 +28,6 @@ export default function ApplicationList() {
             setLoading(true);
             setError(null);
             const applications = await getApplications();
-            console.log(applications);
             setApplications(applications);
             
         } catch (error) {
@@ -37,6 +36,16 @@ export default function ApplicationList() {
             setLoading(false);
         }
     }
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteApplication(id);    
+            setApplications(applications.filter(app => app.id !== id));
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to delete application');
+        }
+    }
+
     useEffect(() => {
         fetchApplications();
     }, [])
@@ -97,7 +106,10 @@ export default function ApplicationList() {
                                         <button className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg font-medium transition-colors sm:px-4 sm:py-2 sm:text-base">
                                             Update
                                         </button>
-                                        <button className="px-3 py-1.5 text-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg font-medium transition-colors sm:px-4 sm:py-2 sm:text-base">
+                                        <button 
+                                            className="px-3 py-1.5 text-sm bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 rounded-lg font-medium transition-colors sm:px-4 sm:py-2 sm:text-base"
+                                            onClick={() => handleDelete(application.id)}
+                                        >
                                             Delete
                                         </button>
                                     </div>
