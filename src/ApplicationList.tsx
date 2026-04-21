@@ -1,5 +1,5 @@
-import type { Application } from './types/application';
-import { getApplications, deleteApplication } from './api/application';
+import type { Application, AppStatus } from './types/application';
+import { getApplications, deleteApplication, createApplication } from './api/application';
 import { useState, useEffect } from 'react';
 
 const formatDateMMDDYYYY = (value: string | null | undefined): string => {
@@ -20,6 +20,16 @@ export default function ApplicationList() {
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const initialForm = {
+        company: '',
+        role: '',
+        job_url: '',
+        status: 'Applied' as AppStatus,
+        notes: '',
+    };
+    const [form, setForm] = useState(initialForm);
 
 
 
@@ -40,11 +50,37 @@ export default function ApplicationList() {
     const handleDelete = async (id: string) => {
         try {
             await deleteApplication(id);    
-            setApplications(applications.filter(app => app.id !== id));
+            setApplications((prev) => prev.filter((app) => app.id !== id));
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Failed to delete application');
         }
     }
+
+    const closeCreateModal = () => {
+        setIsCreateOpen(false);
+        setForm(initialForm);
+    };
+
+    const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true);
+            setError(null);
+            const newApplication = await createApplication({
+                company: form.company.trim(),
+                role: form.role.trim(),
+                job_url: form.job_url.trim(),
+                status: form.status,
+                notes: form.notes.trim() ? form.notes.trim() : null,
+            });
+            setApplications((currentApplications) => [newApplication, ...currentApplications]);
+            closeCreateModal();
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to create application');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     useEffect(() => {
         fetchApplications();
@@ -73,7 +109,10 @@ export default function ApplicationList() {
                         Back
                     </button>
                     <h1 className="text-xl font-bold sm:text-2xl lg:text-3xl">Application List</h1>
-                    <button className="px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg font-semibold transition-colors sm:px-6">
+                    <button
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-lg font-semibold transition-colors sm:px-6"
+                        onClick={() => setIsCreateOpen(true)}
+                    >
                         New
                     </button>
                 </div>
@@ -157,6 +196,70 @@ export default function ApplicationList() {
                     </ul>
                 )}
             </div>
+            {isCreateOpen && (
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">New Application</h2>
+                        <form className="flex flex-col gap-4" onSubmit={handleCreate}>
+                            <input
+                                className="border border-gray-300 rounded-lg px-3 py-2"
+                                placeholder="Company"
+                                value={form.company}
+                                onChange={(e) => setForm((prev) => ({ ...prev, company: e.target.value }))}
+                                required
+                            />
+                            <input
+                                className="border border-gray-300 rounded-lg px-3 py-2"
+                                placeholder="Role"
+                                value={form.role}
+                                onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+                                required
+                            />
+                            <input
+                                className="border border-gray-300 rounded-lg px-3 py-2"
+                                placeholder="Job URL"
+                                value={form.job_url}
+                                onChange={(e) => setForm((prev) => ({ ...prev, job_url: e.target.value }))}
+                                required
+                            />
+                            <select
+                                className="border border-gray-300 rounded-lg px-3 py-2"
+                                value={form.status}
+                                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as AppStatus }))}
+                            >
+                                <option value="Applied">Applied</option>
+                                <option value="Interviewing">Interviewing</option>
+                                <option value="Offer">Offer</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="FollowUp">FollowUp</option>
+                            </select>
+                            <textarea
+                                className="border border-gray-300 rounded-lg px-3 py-2 min-h-24"
+                                placeholder="Notes (optional)"
+                                value={form.notes}
+                                onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+                            />
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 border border-gray-300 rounded-lg"
+                                    onClick={closeCreateModal}
+                                    disabled={isSubmitting}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Creating...' : 'Create'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

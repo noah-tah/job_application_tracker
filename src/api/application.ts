@@ -12,7 +12,9 @@ export const getApplications = async (): Promise<Application[]> => {
     return response.json();
 };
 
-export const createApplication = async (application: Omit<Application, 'id' | 'updatedAt'>): Promise<Application> => {
+export const createApplication = async (
+    application: Omit<Application, 'id' | 'updatedAt' | 'dateApplied'>
+): Promise<Application> => {
     const response = await fetch(`${API_BASE_URL}`, {
         method: 'POST',
         headers: {
@@ -20,6 +22,9 @@ export const createApplication = async (application: Omit<Application, 'id' | 'u
         },
         body: JSON.stringify(application),
     });
+    if (!response.ok) {
+        throw new Error('Failed to create application');
+    }
     return response.json();
 };
 
